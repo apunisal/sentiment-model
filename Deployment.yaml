@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-model-deployment
+  labels:
+    app: sentiment-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentiment-model
+  template:
+    metadata:
+      labels:
+        app: sentiment-model
+    spec:
+      containers:
+      - name: sentiment-model
+        image: docker.io/apunisal/sentiment-model:v1
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentiment-model-service
+spec:
+  selector:
+    app: sentiment-model
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: sentiment-model-route
+spec:
+  to:
+    kind: Service
+    name: sentiment-model-service
+  port:
+    targetPort: 8080
